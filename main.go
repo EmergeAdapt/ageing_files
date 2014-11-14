@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -33,7 +34,7 @@ func main() {
 					if maxage < 1 {
 						maxage = 3600
 					}
-					watchFolders(c.String("basepath"), strings.Split(c.String("folders"), ","), maxage)
+					watchFolders(c.String("basepath"), strings.Split(c.String("folders"), ","), maxage, c.String("exclude"))
 				}
 			},
 			Flags: []cli.Flag{
@@ -52,6 +53,11 @@ func main() {
 					Value: 3600,
 					Usage: "the maximum permissable age of a file in seconds",
 				},
+				cli.StringFlag{
+					Name:  "exclude",
+					Value: ".DS_Store,backup",
+					Usage: "comma-separated list of file names to ignore",
+				},
 			},
 		},
 	}
@@ -59,9 +65,11 @@ func main() {
 	app.Run(os.Args)
 }
 
-func watchFolders(basepath string, folders []string, maxage int) {
+func watchFolders(basepath string, folders []string, maxage int, exclude string) {
 
 	log := cb.NewConsoleLogger()
+
+	excluded_filenames := strings.Split(exclude, ",")
 	for _, folder := range folders {
 		matches, err := filepath.Glob(fmt.Sprintf("%s/%s/*", basepath, folder))
 		if err != nil {
@@ -82,12 +90,20 @@ func watchFolders(basepath string, folders []string, maxage int) {
 				return
 			}
 
-			if fileInfo.Mode().IsRegular() && !strings.HasSuffix(strings.ToLower(path), "end") {
+			if fileInfo.Mode().IsRegular() && !strings.HasSuffix(strings.ToLower(path), "end") && !isExcluded(path, excluded_filenames) {
 				if time.Since(fileInfo.ModTime()).Seconds() > float64(maxage) {
 					fmt.Println(path)
 				}
 			}
 		}
 	}
+}
 
+func isExcluded(filepath string, excluded_filenames []string) bool {
+	for _, excluded_filename := range excluded_filenames {
+		if strings.ToLower(path.Base(filepath)) == strings.ToLower(excluded_filename) {
+			return true
+		}
+	}
+	return false
 }
