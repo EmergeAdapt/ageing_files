@@ -90,7 +90,7 @@ func watchFolders(basepath string, folders []string, maxage int, exclude string)
 				return
 			}
 
-			if fileInfo.Mode().IsRegular() && !strings.HasSuffix(strings.ToLower(path), "end") && !isExcluded(path, excluded_filenames) {
+			if fileInfo.Mode().IsRegular() && !strings.HasSuffix(strings.ToLower(path), "end") && !IsExcluded(path, excluded_filenames) {
 				if time.Since(fileInfo.ModTime()).Seconds() > float64(maxage) {
 					fmt.Println(path)
 				}
@@ -99,11 +99,16 @@ func watchFolders(basepath string, folders []string, maxage int, exclude string)
 	}
 }
 
-func isExcluded(filepath string, excluded_filenames []string) bool {
+func IsExcluded(filepath string, excluded_filenames []string) bool {
 	for _, excluded_filename := range excluded_filenames {
 		if strings.ToLower(path.Base(filepath)) == strings.ToLower(excluded_filename) {
 			return true
 		}
+		pos := strings.Index(excluded_filename, "*")
+		if pos >= 0 {
+			return pos >= 0 && strings.Index(excluded_filename, excluded_filename[0:pos]) >= 0
+		}
+
 	}
 	return false
 }
