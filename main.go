@@ -103,12 +103,15 @@ func IsExcluded(filepath string, excluded_filenames []string) bool {
 	for _, excluded_filename := range excluded_filenames {
 		excluded_filename := strings.ToLower(excluded_filename)
 		base_fp := strings.ToLower(path.Base(filepath))
+
 		if base_fp == strings.ToLower(excluded_filename) {
 			return true
 		}
 		pos := strings.Index(excluded_filename, "*")
 		if pos >= 0 {
-			return strings.Index(base_fp, excluded_filename[0:pos]) >= 0
+			if strings.Index(base_fp, excluded_filename[0:pos]) >= 0 {
+				return true
+			}
 		}
 
 	}

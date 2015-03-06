@@ -25,10 +25,13 @@ func TestWildcardExcludedFiles(t *testing.T) {
 		}
 	}
 
-	excluded_filenames = []string{"973*"}
+	excluded_filenames = []string{"FLA.txt", "975*", "973*"}
 
 	if IsExcluded("/tmp/974", excluded_filenames) {
 		t.Errorf("%s should not be excluded from %v\n", "/tmp/974", excluded_filenames)
+	}
+	if !IsExcluded("/tmp/973", excluded_filenames) {
+		t.Errorf("%s should be excluded from %v\n", "/tmp/973", excluded_filenames)
 	}
 
 }
