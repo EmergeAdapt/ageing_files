@@ -14,12 +14,14 @@ import (
 )
 
 const (
-	VERSION = "1.2.2"
+	VERSION = "1.2.3"
 )
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "ageing_files"
+	app.Author = "Ijonas Kisselbach (c) EmergeAdapt 2014-2015"
+	app.Email = "development@emergeadapt.com"
 	app.Usage = "Checks file system for old files and notifies via email."
 	app.Version = VERSION
 
@@ -79,6 +81,7 @@ func watchFolders(basepath string, folders []string, maxage int, exclude string)
 
 		for _, path := range matches {
 			file, err := os.Open(path)
+			defer file.Close()
 			if err != nil {
 				log.Panic(err.Error())
 				return
