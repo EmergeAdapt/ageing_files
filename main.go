@@ -111,8 +111,13 @@ func IsExcluded(filepath string, excluded_filenames []string) bool {
 			return true
 		}
 		pos := strings.Index(excluded_filename, "*")
-		if pos >= 0 {
-			if strings.Index(base_fp, excluded_filename[0:pos]) >= 0 {
+		if pos > 0 {
+			if strings.Contains(base_fp, excluded_filename[0:pos]) {
+				return true
+			}
+		} else if pos == 0 {
+			suffix := excluded_filename[1:]
+			if strings.HasSuffix(base_fp, suffix) {
 				return true
 			}
 		}
